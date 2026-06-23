@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Menu — UTKARSH KITCHEN</title>
+ <meta name="description" content="Browse our full menu with hundreds of dishes from top restaurants.">
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <style>
+ .menu-layout { display: grid; grid-template-columns: 260px 1fr; gap: 28px; padding-top: 24px; padding-bottom: 80px; align-items: start; }
+ .sidebar { background: var(--surface); border-radius: var(--radius-xl); padding: 24px; border: 1px solid var(--border); position: sticky; top: 90px; }
+ .sidebar h4 { font-size: .88rem; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+ .sidebar-cat { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); font-size: .88rem; font-weight: 500; color: var(--text-sub); }
+ .sidebar-cat:hover { background: rgba(230,57,70,.07); color: var(--primary); }
+ .sidebar-cat.active { background: rgba(230,57,70,.1); color: var(--primary); font-weight: 700; }
+ .sidebar-cat .emoji { font-size: 1.1rem; }
+ .sidebar-cat .count { margin-left: auto; font-size: .75rem; background: var(--bg-alt); padding: 2px 7px; border-radius: var(--radius-full); }
+ .sidebar-divider { height: 1px; background: var(--border); margin: 18px 0; }
+ .sort-select { width: 100%; padding: 10px 14px; background: var(--bg-alt); border: 1.5px solid var(--border); border-radius: var(--radius-md); font-size: .88rem; color: var(--text); cursor: pointer; }
+ .sort-select:focus { border-color: var(--primary); outline: none; }
+ .veg-toggle { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+ .veg-toggle label { font-size: .88rem; font-weight: 500; }
+ .toggle-switch { position: relative; width: 40px; height: 22px; }
+ .toggle-switch input { opacity: 0; width: 0; height: 0; }
+ .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 22px; cursor: pointer; transition: var(--transition); }
+ .toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: white; left: 3px; top: 3px; transition: var(--transition); }
+ .toggle-switch input:checked + .toggle-slider { background: #2e7d32; }
+ .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+ .mobile-filter-btn { display: none; }
+ .filter-drawer { display: block; }
+ @media(max-width:900px) {
+ .menu-layout { grid-template-columns: 1fr; }
+ .sidebar { display: none; position: fixed; inset: 0; z-index: 800; border-radius: 0; overflow-y: auto; }
+ .sidebar.open { display: block; animation: slideInLeft .3s ease; }
+ @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+ .mobile-filter-btn { display: flex; }
+ }
+ </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+ <div class="container">
+ <div class="nav-inner">
+ <a href="index.html" class="nav-logo">
+ <div class="logo-icon">🍴</div>
+ <span>UTKARSH KITCHEN</span>
+ </a>
+ <div class="nav-search">
+ <i class="fas fa-search"></i>
+ <input type="text" id="navSearchInput" placeholder="Search food or restaurants…" aria-label="Search">
+ </div>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="menu.html" class="active">Menu</a></li>
+ <li><a href="restaurant.html">Restaurants</a></li>
+ <li><a href="menu.html?cat=offers">Offers</a></li>
+ </ul>
+ <div class="nav-actions">
+ <button class="btn-theme" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+ <a href="cart.html" class="cart-btn" aria-label="Cart">
+ <i class="fas fa-shopping-bag"></i>
+ <span class="cart-count" style="display:none">0</span>
+ </a>
+ <a href="#" class="btn-login" data-signin>Sign In</a>
+ <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+ </div>
+ </div>
+ </div>
+</nav>
+<div class="mobile-nav">
+ <div class="mobile-nav-search"><i class="fas fa-search"></i><input type="text" placeholder="Search…"></div>
+ <a href="index.html">🏠 Home</a><a href="menu.html">🍽️ Menu</a>
+ <a href="restaurant.html">🏪 Restaurants</a><a href="cart.html">🛒 Cart</a>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+ <div class="container">
+ <div class="breadcrumb">
+ <a href="index.html">Home</a>
+ <i class="fas fa-chevron-right"></i>
+ <span id="breadcrumbCat">Menu</span>
+ </div>
+ <h1 id="pageTitle">Explore Our Menu</h1>
+ <p id="pageSubtitle">Hundreds of dishes from top-rated restaurants, delivered fast.</p>
+ </div>
+</div>
+
+<!-- MAIN -->
+<main>
+ <div class="container">
+
+ <!-- Mobile filter button -->
+ <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;">
+ <button class="btn btn-ghost btn-sm mobile-filter-btn" id="mobileFilterBtn">
+ <i class="fas fa-sliders-h"></i> Filters
+ </button>
+ <div style="font-size:.85rem;color:var(--text-muted)" id="mobileCount"></div>
+ </div>
+
+ <div class="menu-layout">
+
+ <!-- SIDEBAR FILTERS -->
+ <aside class="sidebar filter-drawer" id="sidebar">
+ <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+ <h3 style="font-size:1.05rem;font-weight:800;">Filters</h3>
+ <button id="clearFilters" style="font-size:.78rem;color:var(--primary);font-weight:600;background:none;">Clear All</button>
+ </div>
+
+ <h4>Categories</h4>
+ <div id="sidebarCats">
+ <div class="sidebar-cat active" data-cat="all">
+ <span class="emoji">🍽️</span> All Items <span class="count">30</span>
+ </div>
+ </div>
+
+ <div class="sidebar-divider"></div>
+ <h4>Sort By</h4>
+ <select class="sort-select" id="sortSelect">
+ <option value="popular">Most Popular</option>
+ <option value="rating">Highest Rated</option>
+ <option value="newest">Newest First</option>
+ <option value="price-asc">Price: Low to High</option>
+ <option value="price-desc">Price: High to Low</option>
+ </select>
+
+ <div class="sidebar-divider"></div>
+ <h4>Dietary</h4>
+ <div class="veg-toggle">
+ <label for="vegToggle">🌿 Veg Only</label>
+ <label class="toggle-switch">
+ <input type="checkbox" id="vegToggle">
+ <span class="toggle-slider"></span>
+ </label>
+ </div>
+ <div class="veg-toggle">
+ <label for="nonVegToggle">🍗 Non-Veg Only</label>
+ <label class="toggle-switch">
+ <input type="checkbox" id="nonVegToggle">
+ <span class="toggle-slider"></span>
+ </label>
+ </div>
+ <div class="sidebar-divider"></div>
+ <h4>Max Price</h4>
+ <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+ <input type="range" class="range-input" id="priceRange" min="50" max="1000" value="1000" step="50">
+ <span class="price-display" id="priceDisplay">₹1000</span>
+ </div>
+
+ <div class="sidebar-divider"></div>
+ <h4>Min Rating</h4>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+ <button class="filter-chip active" data-rating="0">All</button>
+ <button class="filter-chip" data-rating="3">3+</button>
+ <button class="filter-chip" data-rating="4">4+</button>
+ <button class="filter-chip" data-rating="4.5">4.5+</button>
+ </div>
+
+ <!-- Close btn for mobile -->
+ <button id="closeSidebar" style="display:none;width:100%;margin-top:20px;" class="btn btn-primary">
+ <i class="fas fa-check"></i> Apply Filters
+ </button>
+ </aside>
+
+ <!-- FOOD GRID -->
+ <div>
+ <!-- Search bar -->
+ <div class="search-filter-bar">
+ <div class="search-row">
+ <div class="search-input-wrap" style="flex:1">
+ <i class="fas fa-search"></i>
+ <input type="text" id="searchInput" placeholder="Search dishes, restaurants…" aria-label="Search food">
+ </div>
+ <select class="filter-select" id="sortSelectTop">
+ <option value="popular">Most Popular</option>
+ <option value="rating">Top Rated</option>
+ <option value="newest">Newest</option>
+ <option value="price-asc">Price ↑</option>
+ <option value="price-desc">Price ↓</option>
+ </select>
+ </div>
+ <div class="filter-row" id="quickFilters">
+ <button class="filter-chip active" data-qf="all"><i class="fas fa-border-all"></i> All</button>
+ <button class="filter-chip" data-qf="pizza">🍕 Pizza</button>
+ <button class="filter-chip" data-qf="burger">🍔 Burger</button>
+ <button class="filter-chip" data-qf="biryani">🍚 Biryani</button>
+ <button class="filter-chip" data-qf="chicken">🍗 Chicken</button>
+ <button class="filter-chip" data-qf="desserts">🍰 Desserts</button>
+ <button class="filter-chip" data-qf="noodles">🍜 Noodles</button>
+ </div>
+ </div>
+
+ <!-- Results meta -->
+ <div class="results-meta">
+ <div class="count"><span id="resultCount">0</span> items found</div>
+ <div style="font-size:.82rem;color:var(--text-muted)" id="activeFiltersDisplay"></div>
+ </div>
+
+ <!-- Food Grid -->
+ <div class="food-grid" id="foodGrid"></div>
+
+ <!-- No results -->
+ <div class="no-results" id="noResults" style="display:none">
+ <i class="fas fa-search"></i>
+ <h3>No results found</h3>
+ <p>Try adjusting your filters or searching for something else.</p>
+ <button class="btn btn-primary" id="resetBtn" style="margin-top:16px">
+ <i class="fas fa-redo"></i> Reset Filters
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+ <div class="container">
+ <div class="footer-grid">
+ <div class="footer-brand">
+ <div class="nav-logo"><div class="logo-icon">🍴</div><span style="color:white;-webkit-text-fill-color:white">UTKARSH KITCHEN</span></div>
+ <p>Your favourite food, delivered fast.</p>
+ <div class="footer-social">
+ <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+ <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+ <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+ </div>
+ </div>
+ <div class="footer-col"><h4>Menu</h4><ul><li><a href="menu.html">All Items</a></li><li><a href="menu.html?cat=pizza">Pizza</a></li><li><a href="menu.html?cat=burger">Burgers</a></li><li><a href="menu.html?cat=biryani">Biryani</a></li></ul></div>
+ <div class="footer-col"><h4>Support</h4><ul><li><a href="#">Help Centre</a></li><li><a href="#">Track Order</a></li><li><a href="#">Refunds</a></li></ul></div>
+ <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Partner with Us</a></li></ul></div>
+ </div>
+ <div class="footer-bottom"><span>© 2025 UTKARSH KITCHEN. All rights reserved.</span><a href="#">Privacy Policy</a></div>
+ </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+ /* ── Read URL params ── */
+ const params = new URLSearchParams(location.search);
+ const initCat = params.get('cat') || 'all';
+ const initQ = params.get('q') || '';
+
+ /* ── State ── */
+ FilterEngine.setState({
+ query: initQ,
+ category: initCat === 'offers' ? 'all' : initCat,
+ sort: 'popular',
+ maxPrice: 1000,
+ minRating: 0,
+ vegOnly: false,
+ nonVegOnly: false,
+ });
+
+ /* ── Pre-fill search ── */
+ if (initQ) {
+ document.getElementById('searchInput').value = initQ;
+ document.getElementById('navSearchInput').value = initQ;
+ }
+
+ /* ── Update page title ── */
+ if (initCat !== 'all') {
+ const cat = AppData.categories.find(c => c.id === initCat);
+ if (cat) {
+ document.getElementById('pageTitle').textContent = cat.emoji + ' ' + cat.name;
+ document.getElementById('pageSubtitle').textContent = `${cat.count} items from top restaurants.`;
+ document.getElementById('breadcrumbCat').textContent = cat.name;
+ }
+ }
+
+ /* ── Build sidebar categories ── */
+ const sidebarCats = document.getElementById('sidebarCats');
+ sidebarCats.innerHTML = `<div class="sidebar-cat ${initCat==='all'?'active':''}" data-cat="all"><span class="emoji">🍽️</span> All Items <span class="count">${AppData.foodItems.length}</span></div>` +
+ AppData.categories.map(c => `
+ <div class="sidebar-cat ${c.id===initCat?'active':''}" data-cat="${c.id}">
+ <span class="emoji">${c.emoji}</span> ${c.name} <span class="count">${c.count}</span>
+ </div>`).join('');
+
+ /* ── Render ── */
+ function render() {
+ const items = FilterEngine.apply(AppData.foodItems);
+ const grid = document.getElementById('foodGrid');
+ const noRes = document.getElementById('noResults');
+ const count = document.getElementById('resultCount');
+ const mobCount= document.getElementById('mobileCount');
+
+ if (items.length === 0) {
+ grid.innerHTML = ''; noRes.style.display = 'block';
+ } else {
+ grid.innerHTML = items.map(f => renderFoodCard(f)).join('');
+ noRes.style.display = 'none';
+ bindFoodCardEvents(grid);
+ }
+ count.textContent = items.length;
+ if (mobCount) mobCount.textContent = items.length + ' items';
+
+ // Animate in
+ grid.querySelectorAll('.food-card').forEach((el, i) => {
+ el.style.animationDelay = (i * 0.04) + 's';
+ el.style.animation = 'fadeInUp .4s ease both';
+ });
+ }
+
+render();
+
+ /* ── Live search ── */
+ let searchTimer;
+ const searchEl = document.getElementById('searchInput');
+ searchEl.addEventListener('input', () => {
+ clearTimeout(searchTimer);
+ searchTimer = setTimeout(() => {
+ FilterEngine.setState({ query: searchEl.value });
+ render();
+ }, 280);
+ });
+
+ // Nav search sync
+ document.getElementById('navSearchInput').addEventListener('input', e => {
+ searchEl.value = e.target.value;
+ FilterEngine.setState({ query: e.target.value });
+ clearTimeout(searchTimer);
+ searchTimer = setTimeout(render, 280);
+ });
+
+ /* ── Sort ── */
+ const sortEl = document.getElementById('sortSelect');
+ const sortTopEl = document.getElementById('sortSelectTop');
+ function onSort(e) {
+ FilterEngine.setState({ sort: e.target.value });
+ sortEl.value = e.target.value;
+ sortTopEl.value = e.target.value;
+ render();
+ }
+ sortEl.addEventListener('change', onSort);
+ sortTopEl.addEventListener('change', onSort);
+
+ /* ── Category (sidebar) ── */
+ sidebarCats.addEventListener('click', e => {
+ const card = e.target.closest('[data-cat]');
+ if (!card) return;
+ sidebarCats.querySelectorAll('.sidebar-cat').forEach(c => c.classList.remove('active'));
+ card.classList.add('active');
+ FilterEngine.setState({ category: card.dataset.cat });
+ syncQuickFilter(card.dataset.cat);
+ render();
+ });
+
+ /* ── Quick filter chips ── */
+ document.getElementById('quickFilters').addEventListener('click', e => {
+ const chip = e.target.closest('[data-qf]');
+ if (!chip) return;
+ document.querySelectorAll('[data-qf]').forEach(c => c.classList.remove('active'));
+ chip.classList.add('active');
+ FilterEngine.setState({ category: chip.dataset.qf });
+ syncSidebarCat(chip.dataset.qf);
+ render();
+ });
+
+ function syncQuickFilter(cat) {
+ document.querySelectorAll('[data-qf]').forEach(c => c.classList.toggle('active', c.dataset.qf === cat));
+ }
+ function syncSidebarCat(cat) {
+ sidebarCats.querySelectorAll('.sidebar-cat').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+ }
+
+ /* ── Veg toggles ── */
+ document.getElementById('vegToggle').addEventListener('change', e => {
+ FilterEngine.setState({ vegOnly: e.target.checked, nonVegOnly: false });
+ document.getElementById('nonVegToggle').checked = false;
+ render();
+ });
+ document.getElementById('nonVegToggle').addEventListener('change', e => {
+ FilterEngine.setState({ nonVegOnly: e.target.checked, vegOnly: false });
+ document.getElementById('vegToggle').checked = false;
+ render();
+ });
+
+ /* ── Price range ── */
+ const priceRange = document.getElementById('priceRange');
+ const priceDisplay = document.getElementById('priceDisplay');
+ priceRange.addEventListener('input', () => {
+ priceDisplay.textContent = '₹' + priceRange.value;
+ FilterEngine.setState({ maxPrice: +priceRange.value });
+ render();
+ });
+
+ /* ── Rating chips ── */
+ document.querySelectorAll('[data-rating]').forEach(btn => {
+ btn.addEventListener('click', () => {
+ document.querySelectorAll('[data-rating]').forEach(b => b.classList.remove('active'));
+ btn.classList.add('active');
+ FilterEngine.setState({ minRating: +btn.dataset.rating });
+ render();
+ });
+ });
+
+ /* ── Clear filters ── */
+ function clearAll() {
+ FilterEngine.setState({ query:'', category:'all', vegOnly:false, nonVegOnly:false, maxPrice:1000, minRating:0, sort:'popular' });
+ document.getElementById('searchInput').value = '';
+ document.getElementById('vegToggle').checked = false;
+ document.getElementById('nonVegToggle').checked = false;
+ priceRange.value = 1000; priceDisplay.textContent = '₹1000';
+ sortEl.value = 'popular'; sortTopEl.value = 'popular';
+ sidebarCats.querySelectorAll('.sidebar-cat').forEach((c,i)=>c.classList.toggle('active', i===0));
+ document.querySelectorAll('[data-qf]').forEach((c,i)=>c.classList.toggle('active', i===0));
+ document.querySelectorAll('[data-rating]').forEach((c,i)=>c.classList.toggle('active', i===0));
+ render();
+ }
+ document.getElementById('clearFilters').addEventListener('click', clearAll);
+ document.getElementById('resetBtn').addEventListener('click', clearAll);
+
+ /* ── Mobile sidebar ── */
+ const sidebar = document.getElementById('sidebar');
+ const openBtn = document.getElementById('mobileFilterBtn');
+ const closeBtn = document.getElementById('closeSidebar');
+ if (window.innerWidth <= 900) closeBtn.style.display = 'block';
+ openBtn?.addEventListener('click', () => sidebar.classList.add('open'));
+ closeBtn?.addEventListener('click', () => sidebar.classList.remove('open'));
+
+ /* ── Sync initial quick filter ── */
+ syncQuickFilter(FilterEngine.state.category);
+ syncSidebarCat(FilterEngine.state.category);
+});
+</script>
+</body>
+</html>

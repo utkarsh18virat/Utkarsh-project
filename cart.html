@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>My Cart — UTKARSH KITCHEN</title>
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+ <div class="container">
+ <div class="nav-inner">
+ <a href="index.html" class="nav-logo"><div class="logo-icon">🍴</div><span>UTKARSH KITCHEN</span></a>
+ <div class="nav-search">
+ <i class="fas fa-search"></i>
+ <input type="text" placeholder="Search food or restaurants…" aria-label="Search">
+ </div>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="menu.html">Menu</a></li>
+ <li><a href="restaurant.html">Restaurants</a></li>
+ <li><a href="menu.html?cat=offers">Offers</a></li>
+ </ul>
+ <div class="nav-actions">
+ <button class="btn-theme" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+ <a href="cart.html" class="cart-btn active" aria-label="Cart">
+ <i class="fas fa-shopping-bag"></i>
+ <span class="cart-count" style="display:none">0</span>
+ </a>
+ <a href="#" class="btn-login" data-signin>Sign In</a>
+ <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+ </div>
+ </div>
+ </div>
+</nav>
+<div class="mobile-nav">
+ <div class="mobile-nav-search"><i class="fas fa-search"></i><input type="text" placeholder="Search…"></div>
+ <a href="index.html">🏠 Home</a><a href="menu.html">🍽️ Menu</a>
+ <a href="restaurant.html">🏪 Restaurants</a><a href="cart.html">🛒 Cart</a>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+ <div class="container">
+ <div class="breadcrumb">
+ <a href="index.html">Home</a>
+ <i class="fas fa-chevron-right"></i>
+ <span>Shopping Cart</span>
+ </div>
+ <h1>Your Cart</h1>
+ <p id="cartHeaderSub">Review your items before checkout.</p>
+ </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main>
+ <div class="container">
+
+ <!-- EMPTY CART STATE -->
+ <div class="cart-empty" id="cartEmpty" style="display:none">
+ <i class="fas fa-shopping-bag"></i>
+ <h2>Your cart is empty</h2>
+ <p>Looks like you haven't added anything yet. Let's fix that!</p>
+ <a href="menu.html" class="btn btn-primary btn-lg">
+ <i class="fas fa-utensils"></i> Browse Menu
+ </a>
+ </div>
+
+ <!-- CART LAYOUT -->
+ <div class="cart-layout" id="cartLayout" style="display:none">
+
+ <!-- LEFT: Cart Items + Saved -->
+ <div>
+ <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+ <h2 style="font-size:1.3rem;font-weight:800">Cart Items <span id="itemCount" style="color:var(--text-muted);font-size:1rem;font-weight:400"></span></h2>
+ <button id="clearCartBtn" style="font-size:.82rem;color:var(--primary);font-weight:600;background:none;display:flex;align-items:center;gap:6px;">
+ <i class="fas fa-trash-alt"></i> Clear Cart
+ </button>
+ </div>
+
+ <div id="cartItemsList"></div>
+
+ <!-- Saved for Later -->
+ <div class="saved-items" id="savedSection" style="display:none">
+ <h3>Saved for Later</h3>
+ <div id="savedList"></div>
+ </div>
+
+ <!-- Continue shopping -->
+ <div style="margin-top:28px;">
+ <a href="menu.html" class="btn btn-ghost" style="gap:8px;">
+ <i class="fas fa-arrow-left"></i> Continue Shopping
+ </a>
+ </div>
+ </div>
+
+ <!-- RIGHT: Order Summary -->
+ <div class="cart-summary">
+ <h3>Order Summary</h3>
+
+ <!-- Coupon -->
+ <div class="coupon-row">
+ <input type="text" id="couponInput" placeholder="Enter coupon code" maxlength="20" aria-label="Coupon code">
+ <button id="couponBtn">Apply</button>
+ </div>
+ <div id="couponStatus" style="font-size:.8rem;margin-top:-10px;margin-bottom:12px;min-height:16px;"></div>
+
+ <!-- Offer chips -->
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+ <button class="tag" style="cursor:pointer;" data-code="FEAST20">FEAST20</button>
+ <button class="tag" style="cursor:pointer;" data-code="NEWUSER">NEWUSER</button>
+ <button class="tag" style="cursor:pointer;" data-code="FREEDEL">FREEDEL</button>
+ </div>
+
+ <!-- Price breakdown -->
+ <div class="summary-lines" id="summaryLines"></div>
+
+ <!-- Free delivery notice -->
+ <div id="freeDelNotice" style="font-size:.78rem;color:#2e7d32;background:rgba(46,125,50,.08);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:16px;display:none">
+ <i class="fas fa-check-circle"></i> You qualify for <strong>free delivery</strong>!
+ </div>
+
+ <!-- Checkout button -->
+ <a href="checkout.html" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" id="checkoutBtn">
+ Proceed to Checkout <i class="fas fa-arrow-right"></i>
+ </a>
+
+ <!-- Safe checkout badge -->
+ <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;font-size:.75rem;color:var(--text-muted);">
+ <i class="fas fa-lock"></i> Secure & Encrypted Checkout
+ </div>
+
+ <!-- Payment icons -->
+ <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+ <span style="font-size:1.3rem">💳</span>
+ <span style="font-size:1.3rem">📱</span>
+ <span style="font-size:1.3rem">🏦</span>
+ <span style="font-size:1.3rem">💵</span>
+ </div>
+ </div>
+ </div>
+
+ <!-- You May Also Like -->
+ <div id="suggestSection" style="padding:40px 0 80px;">
+ <div class="section-header">
+ <span class="eyebrow">More to Explore</span>
+ <h2>You May Also Like</h2>
+ </div>
+ <div class="food-grid" id="suggestGrid"></div>
+ </div>
+
+ </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+ <div class="container">
+ <div class="footer-grid">
+ <div class="footer-brand">
+ <div class="nav-logo"><div class="logo-icon">🍴</div><span style="color:white;-webkit-text-fill-color:white">UTKARSH KITCHEN</span></div>
+ <p>Your favourite food, delivered fast.</p>
+ <div class="footer-social">
+ <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+ <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+ <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+ </div>
+ </div>
+ <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="menu.html">Menu</a></li><li><a href="restaurant.html">Restaurants</a></li></ul></div>
+ <div class="footer-col"><h4>Support</h4><ul><li><a href="#">Help Centre</a></li><li><a href="#">Track Order</a></li><li><a href="#">Refunds</a></li></ul></div>
+ <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Partner</a></li></ul></div>
+ </div>
+ <div class="footer-bottom"><span>© 2025 UTKARSH KITCHEN. All rights reserved.</span></div>
+ </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+ const fmt = n => '₹' + n.toLocaleString('en-IN');
+ /* ── Render cart items ── */
+ function renderCart() {
+ const items = Cart.getItems();
+ const saved = Cart.getSaved();
+ const cartLayout = document.getElementById('cartLayout');
+ const cartEmpty = document.getElementById('cartEmpty');
+ const summary = Cart.getSummary();
+
+ if (items.length === 0 && saved.length === 0) {
+ cartLayout.style.display = 'none';
+ cartEmpty.style.display = 'block';
+ document.getElementById('suggestSection').style.display = 'none';
+ document.getElementById('cartHeaderSub').textContent = '';
+ return;
+ }
+
+ cartLayout.style.display = 'grid';
+ cartEmpty.style.display = 'none';
+
+ document.getElementById('itemCount').textContent = `(${items.length} item${items.length !== 1 ? 's' : ''})`;
+ document.getElementById('cartHeaderSub').textContent = `${summary.count} item(s) in your cart.`;
+
+ document.getElementById('cartItemsList').innerHTML = items.map(item => `
+ <div class="cart-item" data-id="${item.id}">
+ <img class="cart-item-img" src="${item.image || ''}" alt="${item.name || ''}"
+ onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=200&fit=crop'">
+ <div class="cart-item-info">
+ <div class="cart-item-name">${item.name || 'Item'}</div>
+ <div class="cart-item-rest">
+ <span class="badge ${item.isVeg ? 'badge-veg' : 'badge-nonveg'}" style="padding:2px 8px;font-size:.65rem">
+ ${item.isVeg ? 'Veg' : 'Non-Veg'}
+ </span>
+ </div>
+ <div class="cart-item-price">${fmt(item.price || 0)} <span style="font-size:.78rem;font-weight:400;color:var(--text-muted)">per item</span></div>
+ </div>
+ <div class="cart-item-actions">
+ <div class="qty-ctrl">
+ <button class="qty-minus" data-id="${item.id}" aria-label="Decrease">−</button>
+ <span class="qty-num">${item.qty}</span>
+ <button class="qty-plus" data-id="${item.id}" aria-label="Increase">+</button>
+ </div>
+ <div style="text-align:right">
+ <div style="font-size:1rem;font-weight:800;color:var(--text)">${fmt((item.price || 0) * item.qty)}</div>
+ <div style="display:flex;gap:12px;margin-top:6px;">
+ <button class="cart-item-save" data-save="${item.id}"><i class="far fa-bookmark"></i> Save</button>
+ <button class="cart-remove" data-remove="${item.id}" aria-label="Remove item"><i class="fas fa-times"></i></button>
+ </div>
+ </div>
+ </div>
+ </div>`).join('');
+
+ // Saved for later
+ const savedSection = document.getElementById('savedSection');
+ const savedList = document.getElementById('savedList');
+ if (saved.length > 0) {
+ savedSection.style.display = 'block';
+ savedList.innerHTML = saved.map(item => `
+ <div class="cart-item" data-saved="${item.id}">
+ <img class="cart-item-img" src="${item.image || ''}" alt="${item.name || ''}"
+ onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=200&fit=crop'">
+ <div class="cart-item-info">
+ <div class="cart-item-name">${item.name || 'Item'}</div>
+ <div class="cart-item-price">${fmt(item.price || 0)}</div>
+ </div>
+ <div style="display:flex;gap:8px;flex-direction:column;align-items:flex-end;">
+ <button class="btn btn-outline btn-sm" data-movecart="${item.id}">Move to Cart</button>
+ <button class="cart-item-save" style="color:var(--primary)" data-removesaved="${item.id}">Remove</button>
+ </div>
+ </div>`).join('');
+ } else {
+ savedSection.style.display = 'none';
+ }
+
+ renderCartSummary(document.getElementById('summaryLines'));
+
+ const notice = document.getElementById('freeDelNotice');
+ if (notice) notice.style.display = summary.delivery === 0 && summary.sub > 0 ? 'block' : 'none';
+
+ const checkoutBtn = document.getElementById('checkoutBtn');
+ if (checkoutBtn) {
+ checkoutBtn.style.opacity = items.length ? '1' : '.5';
+ checkoutBtn.style.pointerEvents = items.length ? 'auto' : 'none';
+ }
+ }
+
+ /* ── Suggestions ── */
+ function renderSuggestions() {
+ const cartIds = Cart.getItems().map(i => i.id);
+ const suggest = AppData.sort(
+ AppData.foodItems.filter(f => !cartIds.includes(f.id)), 'popular'
+ ).slice(0, 4);
+ const grid = document.getElementById('suggestGrid');
+ if (!grid) return;
+ grid.innerHTML = suggest.map(f => renderFoodCard(f)).join('');
+ bindFoodCardEvents(grid);
+ }
+
+ /* ── Event delegation: cart items ── */
+ document.getElementById('cartItemsList').addEventListener('click', e => {
+ if (e.target.closest('.qty-plus')) {
+ const id = e.target.closest('.qty-plus').dataset.id;
+ Cart.updateQty(id, (Cart.getItemById(id)?.qty || 0) + 1);
+ }
+ if (e.target.closest('.qty-minus')) {
+ const id = e.target.closest('.qty-minus').dataset.id;
+ const qty = Cart.getItemById(id)?.qty || 0;
+ Cart.updateQty(id, qty - 1);
+ if (qty - 1 <= 0) Toast.info('Removed', 'Item removed from cart', 2000);
+ }
+ if (e.target.closest('[data-remove]')) {
+ const id = e.target.closest('[data-remove]').dataset.remove;
+ const item = AppData.foodItems.find(f => f.id === id);
+ Cart.removeItem(id);
+ Toast.info('Removed', item?.name || 'Item removed', 2000);
+ }
+ if (e.target.closest('[data-save]')) {
+ const id = e.target.closest('[data-save]').dataset.save;
+ const item = AppData.foodItems.find(f => f.id === id);
+ Cart.saveForLater(id);
+ Toast.success('Saved!', `${item?.name || 'Item'} saved for later`, 2000);
+ }
+ });
+
+ /* ── Event delegation: saved items ── */
+ document.getElementById('savedList').addEventListener('click', e => {
+ if (e.target.closest('[data-movecart]')) {
+ Cart.moveToCart(e.target.closest('[data-movecart]').dataset.movecart);
+ Toast.success('Moved to Cart!', '', 2000);
+ }
+ if (e.target.closest('[data-removesaved]')) {
+ Cart.removeSaved(e.target.closest('[data-removesaved]').dataset.removesaved);
+ Toast.info('Removed', '', 2000);
+ }
+ });
+
+ /* ── Clear cart ── */
+ document.getElementById('clearCartBtn').addEventListener('click', () => {
+ if (!Cart.getItems().length) return;
+ if (confirm('Remove all items from cart?')) {
+ Cart.clearCart();
+ Toast.warning('Cart Cleared', 'All items removed', 2500);
+ }
+ });
+
+ /* ── Coupon chips ── */
+ document.querySelectorAll('[data-code]').forEach(btn => {
+ btn.addEventListener('click', () => {
+ document.getElementById('couponInput').value = btn.dataset.code;
+ });
+ });
+
+ /* ── Coupon input ── */
+ initCouponInput(
+ document.getElementById('couponInput'),
+ document.getElementById('couponBtn'),
+ document.getElementById('couponStatus')
+ );
+
+ /* ── Live updates ── */
+ Cart.onUpdate(() => {
+ renderCart();
+ renderSuggestions();
+ });
+
+ /* ── Initial render ── */
+ renderCart();
+ renderSuggestions();
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Payment — UTKARSH KITCHEN</title>
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <style>
+ /* Payment-specific styles */
+ .upi-apps { display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; }
+ .upi-app-btn {
+ display:flex; flex-direction:column; align-items:center; gap:6px;
+ padding:14px 18px; border-radius:var(--radius-lg);
+ border:1.5px solid var(--border); cursor:pointer; transition:var(--transition);
+ background:var(--surface); min-width:80px;
+ }
+ .upi-app-btn:hover { border-color:var(--primary); transform:translateY(-2px); }
+ .upi-app-btn.selected { border-color:var(--primary); background:rgba(230,57,70,.05); }
+ .upi-app-btn .icon { font-size:2rem; }
+ .upi-app-btn .name { font-size:.72rem; font-weight:700; color:var(--text-sub); }
+ .upi-input-row { display:flex; gap:10px; margin-top:14px; }
+ .upi-input-row input { flex:1; padding:11px 16px; border-radius:var(--radius-md); background:var(--bg-alt); border:1.5px solid var(--border); font-size:.9rem; color:var(--text); transition:var(--transition); }
+ .upi-input-row input:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 3px rgba(230,57,70,.1); }
+
+ .card-form .form-group { margin-bottom:16px; }
+ .card-form label { display:block; font-size:.82rem; font-weight:600; color:var(--text-sub); margin-bottom:6px; }
+ .card-form input {
+ width:100%; padding:11px 16px; border-radius:var(--radius-md);
+ background:var(--bg-alt); border:1.5px solid var(--border);
+ font-size:.9rem; color:var(--text); transition:var(--transition);
+ }
+ .card-form input:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 3px rgba(230,57,70,.1); }
+ .card-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+ .net-banks { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+ .bank-opt {
+ display:flex; align-items:center; gap:10px; padding:12px 14px;
+ border:1.5px solid var(--border); border-radius:var(--radius-md);
+ cursor:pointer; font-size:.85rem; font-weight:500; color:var(--text-sub);
+ transition:var(--transition); background:var(--surface);
+ }
+ .bank-opt:hover { border-color:var(--primary); color:var(--primary); }
+ .bank-opt.selected { border-color:var(--primary); background:rgba(230,57,70,.05); color:var(--primary); }
+ .bank-opt .bank-icon { font-size:1.3rem; }
+
+ /* Processing overlay */
+ .processing-overlay {
+ display:none; position:fixed; inset:0; z-index:3000;
+ background:rgba(0,0,0,.7); backdrop-filter:blur(8px);
+ align-items:center; justify-content:center;
+ }
+ .processing-overlay.show { display:flex; animation:fadeInOverlay .3s ease; }
+ .processing-card {
+ background:var(--surface); border-radius:var(--radius-xl);
+ padding:48px 40px; text-align:center; max-width:360px; width:100%;
+ animation:modalIn .4s ease;
+ }
+ .spinner {
+ width:60px; height:60px; border:4px solid var(--border);
+ border-top-color:var(--primary); border-radius:50%;
+ animation:spin 0.8s linear infinite; margin:0 auto 20px;
+ }
+ @keyframes spin { to { transform:rotate(360deg); } }
+ </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+ <div class="container">
+ <div class="nav-inner">
+ <a href="index.html" class="nav-logo"><div class="logo-icon">🍴</div><span>UTKARSH KITCHEN</span></a>
+ <div class="nav-search"><i class="fas fa-search"></i><input type="text" placeholder="Search…" aria-label="Search"></div>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li><li><a href="menu.html">Menu</a></li>
+ <li><a href="restaurant.html">Restaurants</a></li>
+ </ul>
+ <div class="nav-actions">
+ <button class="btn-theme" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+ <a href="cart.html" class="cart-btn" aria-label="Cart">
+ <i class="fas fa-shopping-bag"></i>
+ <span class="cart-count" style="display:none">0</span>
+ </a>
+ <a href="#" class="btn-login" data-signin>Sign In</a>
+ <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+ </div>
+ </div>
+ </div>
+</nav>
+<div class="mobile-nav">
+ <div class="mobile-nav-search"><i class="fas fa-search"></i><input type="text" placeholder="Search…"></div>
+ <a href="index.html">🏠 Home</a><a href="menu.html">🍽️ Menu</a><a href="cart.html">🛒 Cart</a>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+ <div class="container">
+ <div class="breadcrumb">
+ <a href="index.html">Home</a><i class="fas fa-chevron-right"></i>
+ <a href="cart.html">Cart</a><i class="fas fa-chevron-right"></i>
+ <a href="checkout.html">Checkout</a><i class="fas fa-chevron-right"></i>
+ <span>Payment</span>
+ </div>
+ <h1>Payment</h1>
+ <p>Choose your preferred payment method.</p>
+ </div>
+</div>
+
+<main>
+ <div class="container">
+
+ <!-- Step indicator -->
+ <div class="step-indicator" style="margin-bottom:36px;">
+ <div style="display:flex;flex-direction:column;align-items:center;"><a href="cart.html" style="width:32px;height:32px;border-radius:50%;background:#4caf50;border:2px solid transparent;display:flex;align-items:center;justify-content:center;color:white;font-size:.82rem;font-weight:700;"><i class="fas fa-check"></i></a><div style="font-size:.75rem;font-weight:600;color:#4caf50;margin-top:5px;">Cart</div></div>
+ <div style="width:60px;height:2px;background:var(--gradient);"></div>
+ <div style="display:flex;flex-direction:column;align-items:center;"><a href="checkout.html" style="width:32px;height:32px;border-radius:50%;background:#4caf50;border:2px solid transparent;display:flex;align-items:center;justify-content:center;color:white;font-size:.82rem;font-weight:700;"><i class="fas fa-check"></i></a><div style="font-size:.75rem;font-weight:600;color:#4caf50;margin-top:5px;">Checkout</div></div>
+ <div style="width:60px;height:2px;background:var(--gradient);"></div>
+ <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:32px;height:32px;border-radius:50%;background:var(--gradient);border:2px solid transparent;display:flex;align-items:center;justify-content:center;color:white;font-size:.82rem;font-weight:700;box-shadow:0 3px 12px rgba(230,57,70,.35);">3</div><div style="font-size:.75rem;font-weight:600;color:var(--primary);margin-top:5px;">Payment</div></div>
+ <div style="width:60px;height:2px;background:var(--border);"></div>
+ <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:32px;height:32px;border-radius:50%;background:var(--surface);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.82rem;font-weight:700;">4</div><div style="font-size:.75rem;font-weight:600;color:var(--text-muted);margin-top:5px;">Done</div></div>
+ </div>
+
+<div class="payment-layout">
+
+ <!-- LEFT: Payment Methods -->
+ <div>
+ <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:24px;">Select Payment Method</h2>
+
+ <!-- UPI -->
+ <div class="payment-method-option selected" id="opt-upi" onclick="selectMethod('upi')">
+ <input type="radio" name="payMethod" value="upi" checked>
+ <div class="payment-method-icon">📱</div>
+ <div class="payment-method-label">
+ <div class="name">UPI Payment</div>
+ <div class="desc">Pay using any UPI app</div>
+ </div>
+ </div>
+ <div id="panel-upi" class="card-form form-card" style="border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);margin-top:-4px;margin-bottom:12px;">
+ <div style="font-size:.85rem;font-weight:600;margin-bottom:12px;color:var(--text-sub);">Choose UPI App</div>
+ <div class="upi-apps">
+ <div class="upi-app-btn selected" onclick="selectUpiApp(this,'gpay')"><div class="icon">🟢</div><div class="name">Google Pay</div></div>
+ <div class="upi-app-btn" onclick="selectUpiApp(this,'phonepe')"><div class="icon">💜</div><div class="name">PhonePe</div></div>
+ <div class="upi-app-btn" onclick="selectUpiApp(this,'paytm')"><div class="icon">🔵</div><div class="name">Paytm</div></div>
+ <div class="upi-app-btn" onclick="selectUpiApp(this,'bhim')"><div class="icon">🇮🇳</div><div class="name">BHIM</div></div>
+ <div class="upi-app-btn" onclick="selectUpiApp(this,'other')"><div class="icon">🏦</div><div class="name">Other UPI</div></div>
+ </div>
+ <div class="upi-input-row">
+ <input type="text" id="upiId" placeholder="Enter UPI ID (e.g. name@upi)" autocomplete="off">
+ <button class="btn btn-outline btn-sm" style="flex-shrink:0;padding:11px 18px;" onclick="verifyUpi()">Verify</button>
+ </div>
+ <div id="upiStatus" style="font-size:.78rem;margin-top:8px;min-height:16px;"></div>
+ </div>
+
+ <!-- Credit/Debit Card -->
+ <div class="payment-method-option" id="opt-card" onclick="selectMethod('card')">
+ <input type="radio" name="payMethod" value="card">
+ <div class="payment-method-icon">💳</div>
+ <div class="payment-method-label">
+ <div class="name">Credit / Debit Card</div>
+ <div class="desc">Visa, Mastercard, RuPay, Amex</div>
+ </div>
+ <div style="display:flex;gap:4px;margin-left:auto;">
+ <span style="font-size:1.1rem">💳</span>
+ </div>
+ </div>
+ <div id="panel-card" class="card-form form-card" style="border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);margin-top:-4px;margin-bottom:12px;display:none;">
+ <div class="form-group">
+ <label for="cardNumber">Card Number</label>
+ <input type="text" id="cardNumber" class="card-number-input" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
+ </div>
+ <div class="form-group">
+ <label for="cardName">Name on Card</label>
+ <input type="text" id="cardName" placeholder="RAHUL SHARMA" autocomplete="cc-name">
+ </div>
+ <div class="card-row">
+ <div class="form-group">
+ <label for="cardExpiry">Expiry Date</label>
+ <input type="text" id="cardExpiry" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp">
+ </div>
+ <div class="form-group">
+ <label for="cardCvv">CVV</label>
+ <input type="password" id="cardCvv" placeholder="•••" maxlength="4" autocomplete="cc-csc">
+ </div>
+ </div>
+ <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text-sub);cursor:pointer;">
+ <input type="checkbox" style="accent-color:var(--primary)"> Save card for future payments
+ </label>
+ </div>
+
+ <!-- Net Banking -->
+ <div class="payment-method-option" id="opt-netbanking" onclick="selectMethod('netbanking')">
+ <input type="radio" name="payMethod" value="netbanking">
+ <div class="payment-method-icon">🏦</div>
+ <div class="payment-method-label">
+ <div class="name">Net Banking</div>
+ <div class="desc">All major banks supported</div>
+ </div>
+ </div>
+ <div id="panel-netbanking" class="form-card" style="border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);margin-top:-4px;margin-bottom:12px;display:none;">
+ <div class="net-banks">
+ <div class="bank-opt" onclick="selectBank(this)"><span class="bank-icon">🏦</span> SBI</div>
+ <div class="bank-opt" onclick="selectBank(this)"><span class="bank-icon">🏦</span> HDFC Bank</div>
+ <div class="bank-opt" onclick="selectBank(this)"><span class="bank-icon">🏦</span> ICICI Bank</div>
+ <div class="bank-opt" onclick="selectBank(this)"><span class="bank-icon">🏦</span> Axis Bank</div>
+ <div class="bank-opt" onclick="selectBank(this)"><span class="bank-icon">🏦</span> Kotak Bank</div>
+ <div class="bank-opt" onclick="selectBank(this)"><span class="bank-icon">🏦</span> Yes Bank</div>
+ </div>
+ </div>
+
+ <!-- Apple Pay -->
+ <div class="payment-method-option" id="opt-applepay" onclick="selectMethod('applepay')">
+ <input type="radio" name="payMethod" value="applepay">
+ <div class="payment-method-icon"> </div>
+ <div class="payment-method-label">
+ <div class="name">Apple Pay / Wallet</div>
+ <div class="desc">Pay with Face ID or Touch ID</div>
+ </div>
+ </div>
+
+<!-- Cash on Delivery -->
+ <div class="payment-method-option" id="opt-cod" onclick="selectMethod('cod')">
+ <input type="radio" name="payMethod" value="cod">
+ <div class="payment-method-icon">💵</div>
+ <div class="payment-method-label">
+ <div class="name">Cash on Delivery</div>
+ <div class="desc">Pay when your order arrives</div>
+ </div>
+ </div>
+ <div id="panel-cod" style="display:none;background:rgba(255,152,0,.07);border:1px solid rgba(255,152,0,.2);border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:14px 20px;margin-top:-4px;margin-bottom:12px;font-size:.85rem;color:#e65100;">
+ <i class="fas fa-info-circle"></i> Please keep exact change ready. COD available up to ₹2,000.
+ </div>
+
+ <!-- Place Order CTA -->
+ <button class="btn btn-primary btn-lg" id="placeOrderBtn" style="width:100%;justify-content:center;margin-top:8px;">
+ <i class="fas fa-lock"></i> Place Order — <span id="payBtnTotal"></span>
+ </button>
+ <p style="font-size:.78rem;color:var(--text-muted);text-align:center;margin-top:10px;">
+ By placing order you agree to our <a href="#" style="color:var(--primary)">Terms of Service</a> & <a href="#" style="color:var(--primary)">Privacy Policy</a>
+ </p>
+ </div>
+
+ <!-- RIGHT: Order Summary -->
+ <div class="order-summary">
+ <h3>Final Bill</h3>
+ <div id="payOrderItems"></div>
+ <div class="summary-lines" id="paySummary" style="margin-top:16px;"></div>
+
+ <!-- Delivery address recap -->
+ <div style="margin-top:18px;padding:14px;background:var(--bg-alt);border-radius:var(--radius-md);">
+ <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">
+ <i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> Delivering To
+ </div>
+ <div id="deliveryAddress" style="font-size:.88rem;color:var(--text-sub);line-height:1.5;"></div>
+ </div>
+
+ <!-- Security badges -->
+ <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+ <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--text-muted);"><i class="fas fa-shield-alt" style="color:#4caf50;"></i> 100% Secure</div>
+ <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--text-muted);"><i class="fas fa-undo" style="color:var(--primary);"></i> Easy Refunds</div>
+ <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--text-muted);"><i class="fas fa-clock" style="color:#ff9800;"></i> 30 min Delivery</div>
+ </div>
+ </div>
+ </div>
+ </div>
+</main>
+
+<!-- Processing Overlay -->
+<div class="processing-overlay" id="processingOverlay">
+ <div class="processing-card">
+ <div class="spinner"></div>
+ <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:8px;" id="processingTitle">Processing Payment…</h3>
+ <p style="color:var(--text-sub);font-size:.9rem;" id="processingMsg">Please do not close or refresh the page.</p>
+ <div style="margin-top:20px;font-size:.8rem;color:var(--text-muted);">Secured by 256-bit SSL encryption 🔒</div>
+ </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+ <div class="container">
+ <div class="footer-grid">
+ <div class="footer-brand">
+ <div class="nav-logo"><div class="logo-icon">🍴</div><span style="color:white;-webkit-text-fill-color:white">UTKARSH KITCHEN</span></div>
+ <p>Your favourite food, delivered fast.</p>
+ </div>
+ <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="menu.html">Menu</a></li></ul></div>
+ <div class="footer-col"><h4>Support</h4><ul><li><a href="#">Help Centre</a></li><li><a href="#">Refunds</a></li></ul></div>
+ <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li></ul></div>
+ </div>
+ <div class="footer-bottom"><span>© 2025 UTKARSH KITCHEN. All rights reserved.</span></div>
+ </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+ // Redirect if cart empty
+ if (Cart.getTotalCount() === 0) { window.location.href = 'cart.html'; return; }
+
+ const fmt = n => '₹' + n.toLocaleString('en-IN');
+
+ // Render order items + summary
+ renderOrderItems(document.getElementById('payOrderItems'));
+ renderCartSummary(document.getElementById('paySummary'));
+
+ // Pay button total
+ document.getElementById('payBtnTotal').textContent = fmt(Cart.getTotal());
+
+ // Delivery address
+ try {
+ const order = JSON.parse(sessionStorage.getItem('UTKARSH KITCHEN_order')) || {};
+ const addrEl = document.getElementById('deliveryAddress');
+ addrEl.textContent = `${order.firstName || 'Guest'} ${order.lastName || ''} • ${order.phone || ''}\n${order.address || '12 Rosewood Lane, Bandra West, Mumbai'}`;
+ addrEl.style.whiteSpace = 'pre-line';
+ } catch {}
+
+ // Format card number with spaces
+ document.getElementById('cardNumber')?.addEventListener('input', function() {
+ let v = this.value.replace(/\D/g,'').slice(0,16);
+ this.value = v.replace(/(.{4})/g,'$1 ').trim();
+ });
+
+ // Format expiry
+ document.getElementById('cardExpiry')?.addEventListener('input', function() {
+ let v = this.value.replace(/\D/g,'').slice(0,4);
+ if (v.length >= 2) v = v.slice(0,2) + ' / ' + v.slice(2);
+ this.value = v;
+ });
+});
+
+
+/* ── Method selection ── */
+let selectedMethod = 'upi';
+function selectMethod(method) {
+ selectedMethod = method;
+ document.querySelectorAll('.payment-method-option').forEach(o => o.classList.remove('selected'));
+ document.querySelectorAll('[id^="panel-"]').forEach(p => p.style.display = 'none');
+ document.getElementById('opt-' + method)?.classList.add('selected');
+ const radio = document.querySelector(`input[value="${method}"]`);
+ if (radio) radio.checked = true;
+ const panel = document.getElementById('panel-' + method);
+ if (panel) panel.style.display = 'block';
+}
+
+/* ── UPI app selection ── */
+function selectUpiApp(btn, app) {
+ document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
+ btn.classList.add('selected');
+}
+
+/* ── UPI verify ── */
+function verifyUpi() {
+ const upiId = document.getElementById('upiId').value.trim();
+ const status = document.getElementById('upiStatus');
+ if (!upiId || !upiId.includes('@')) {
+ status.textContent = '✗ Invalid UPI ID format (e.g. name@upi)';
+ status.style.color = '#e63946'; return;
+ }
+ status.textContent = '⟳ Verifying…'; status.style.color = 'var(--text-muted)';
+ setTimeout(() => {
+ status.textContent = '✓ UPI ID verified successfully!';
+ status.style.color = '#2e7d32';
+ }, 1200);
+}
+
+/* ── Bank selection ── */
+function selectBank(btn) {
+ document.querySelectorAll('.bank-opt').forEach(b => b.classList.remove('selected'));
+ btn.classList.add('selected');
+}
+
+/* ── Place Order ── */
+document.getElementById('placeOrderBtn').addEventListener('click', () => {
+ // Validate
+ if (selectedMethod === 'upi') {
+ const upiId = document.getElementById('upiId').value.trim();
+ if (!upiId || !upiId.includes('@')) {
+ Toast.warning('UPI Required', 'Please enter and verify your UPI ID');
+ return;
+ }
+ }
+ if (selectedMethod === 'card') {
+ const cardNum = document.getElementById('cardNumber').value.replace(/\s/g,'');
+ const cardName = document.getElementById('cardName').value.trim();
+ const expiry = document.getElementById('cardExpiry').value.trim();
+ const cvv = document.getElementById('cardCvv').value.trim();
+ if (cardNum.length < 16) { Toast.warning('Card Error', 'Enter a valid 16-digit card number'); return; }
+ if (!cardName) { Toast.warning('Card Error', 'Enter name on card'); return; }
+ if (expiry.length < 7) { Toast.warning('Card Error', 'Enter valid expiry date'); return; }
+ if (cvv.length < 3) { Toast.warning('Card Error', 'Enter valid CVV'); return; }
+ }
+ if (selectedMethod === 'netbanking') {
+ if (!document.querySelector('.bank-opt.selected')) {
+ Toast.warning('Bank Required', 'Please select a bank'); return;
+ }
+ }
+
+ // Show processing overlay
+ const overlay = document.getElementById('processingOverlay');
+ overlay.classList.add('show');
+
+ const msgs = [
+ { t: 'Connecting to Payment Gateway…', m: 'Please wait while we connect securely.' },
+ { t: 'Verifying Payment Details…', m: 'Almost there, do not close the page.' },
+ { t: 'Placing Your Order…', m: 'Your food is being confirmed with the restaurant.' },
+ ];
+
+ let step = 0;
+ const interval = setInterval(() => {
+ if (step < msgs.length) {
+ document.getElementById('processingTitle').textContent = msgs[step].t;
+ document.getElementById('processingMsg').textContent = msgs[step].m;
+ step++;
+ } else {
+ clearInterval(interval);
+ // Generate order ID and navigate to success
+ const orderId = 'ORD' + Date.now().toString().slice(-8);
+ const totalAmt = Cart.getTotal();
+ Cart.clearCart();
+ sessionStorage.setItem('UTKARSH KITCHEN_last_order', JSON.stringify({
+ id: orderId, total: totalAmt, method: selectedMethod, time: new Date().toLocaleString()
+ }));
+ window.location.href = 'order-success.html';
+ }
+ }, 1400);
+});
+</script>
+</body>
+</html>

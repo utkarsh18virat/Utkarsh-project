@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Order Placed! — UTKARSH KITCHEN</title>
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <style>
+ /* Confetti */
+ .confetti-wrap { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+ .confetti-piece { position:absolute; width:10px; height:10px; border-radius:2px; animation:confettiFall linear infinite; }
+ @keyframes confettiFall {
+ 0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
+ 100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
+ }
+ /* Tracking steps */
+ .tracking-steps { display:flex; flex-direction:column; gap:0; }
+ .track-step { display:flex; gap:16px; padding-bottom:20px; position:relative; }
+ .track-step:last-child { padding-bottom:0; }
+ .track-step::before { content:''; position:absolute; left:14px; top:32px; bottom:0; width:2px; background:var(--border); }
+ .track-step:last-child::before { display:none; }
+ .track-icon { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.85rem; flex-shrink:0; z-index:1; transition:var(--transition); }
+ .track-icon.done { background:#4caf50; color:white; }
+ .track-icon.active { background:var(--gradient); color:white; animation:pulseIcon 2s infinite; }
+ .track-icon.pending { background:var(--bg-alt); color:var(--text-muted); border:2px solid var(--border); }
+ @keyframes pulseIcon { 0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,.4)} 50%{box-shadow:0 0 0 8px rgba(230,57,70,0)} }
+ .track-info .status { font-size:.92rem; font-weight:700; }
+ .track-info .time { font-size:.78rem; color:var(--text-muted); margin-top:2px; }
+ .track-info .desc { font-size:.82rem; color:var(--text-sub); margin-top:4px; }
+ .track-step.done .status { color:#2e7d32; }
+ .track-step.active .status { color:var(--primary); }
+ .track-step.pending .status { color:var(--text-muted); }
+ </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+ <div class="container">
+ <div class="nav-inner">
+ <a href="index.html" class="nav-logo"><div class="logo-icon">🍴</div><span>UTKARSH KITCHEN</span></a>
+ <div class="nav-search"><i class="fas fa-search"></i><input type="text" placeholder="Search…" aria-label="Search"></div>
+ <ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="menu.html">Menu</a></li></ul>
+ <div class="nav-actions">
+ <button class="btn-theme" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+ <a href="cart.html" class="cart-btn" aria-label="Cart">
+ <i class="fas fa-shopping-bag"></i>
+ <span class="cart-count" style="display:none">0</span>
+ </a>
+ <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+ </div>
+ </div>
+ </div>
+</nav>
+<div class="mobile-nav">
+ <div class="mobile-nav-search"><i class="fas fa-search"></i><input type="text" placeholder="Search…"></div>
+ <a href="index.html">🏠 Home</a><a href="menu.html">🍽️ Menu</a>
+</div>
+
+<!-- Confetti -->
+<div class="confetti-wrap" id="confettiWrap" aria-hidden="true"></div>
+
+<!-- SUCCESS PAGE -->
+<div class="success-page">
+ <div class="success-card">
+ <div class="success-icon">
+ <i class="fas fa-check"></i>
+ </div>
+
+ <h1>Order Placed! 🎉</h1>
+ <p>Your order has been confirmed and is being prepared by the restaurant.</p>
+
+ <div class="order-id" id="orderIdDisplay">Order #ORD00000000</div>
+
+ <!-- Tracking -->
+ <div style="background:var(--bg-alt);border-radius:var(--radius-lg);padding:20px;margin-bottom:28px;text-align:left;width:100%;">
+ <h4 style="font-size:.85rem;font-weight:700;color:var(--text-sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;">
+ <i class="fas fa-route" style="color:var(--primary);"></i> Live Tracking
+ </h4>
+ <div class="tracking-steps">
+ <div class="track-step done">
+ <div class="track-icon done"><i class="fas fa-check"></i></div>
+ <div class="track-info">
+ <div class="status">Order Confirmed</div>
+ <div class="time" id="timeConfirmed">Just now</div>
+ <div class="desc">Your order has been received by the restaurant.</div>
+ </div>
+ </div>
+ <div class="track-step active">
+ <div class="track-icon active"><i class="fas fa-utensils"></i></div>
+ <div class="track-info">
+ <div class="status">Being Prepared</div>
+ <div class="time">Expected in ~15 min</div>
+ <div class="desc">Chef is preparing your delicious meal.</div>
+ </div>
+ </div>
+ <div class="track-step pending">
+ <div class="track-icon pending"><i class="fas fa-motorcycle"></i></div>
+ <div class="track-info">
+ <div class="status">Out for Delivery</div>
+ <div class="time">Expected in ~25 min</div>
+ <div class="desc">Rider will pick up and head to you.</div>
+ </div>
+ </div>
+ <div class="track-step pending">
+ <div class="track-icon pending"><i class="fas fa-home"></i></div>
+ <div class="track-info">
+ <div class="status">Delivered</div>
+ <div class="time">Expected ~30–45 min</div>
+ <div class="desc">Enjoy your meal!</div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+
+<!-- Order details -->
+ <div style="background:var(--bg-alt);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:28px;width:100%;text-align:left;">
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+ <span style="font-size:.82rem;color:var(--text-muted);">Total Paid</span>
+ <span style="font-size:1.1rem;font-weight:800;" id="totalPaid">₹0</span>
+ </div>
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+ <span style="font-size:.82rem;color:var(--text-muted);">Payment Method</span>
+ <span style="font-size:.88rem;font-weight:600;" id="paymentMethod">—</span>
+ </div>
+ <div style="display:flex;justify-content:space-between;align-items:center;">
+ <span style="font-size:.82rem;color:var(--text-muted);">Estimated Delivery</span>
+ <span style="font-size:.88rem;font-weight:600;color:#2e7d32;">30–45 mins</span>
+ </div>
+ </div>
+
+ <!-- CTAs -->
+ <div style="display:flex;flex-direction:column;gap:12px;width:100%;">
+ <a href="index.html" class="btn btn-primary btn-lg" style="justify-content:center;">
+ <i class="fas fa-home"></i> Back to Home
+ </a>
+ <a href="menu.html" class="btn btn-outline" style="justify-content:center;">
+ <i class="fas fa-utensils"></i> Order More Food
+ </a>
+ </div>
+ </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+ <div class="container">
+ <div class="footer-grid">
+ <div class="footer-brand">
+ <div class="nav-logo"><div class="logo-icon">🍴</div><span style="color:white;-webkit-text-fill-color:white">UTKARSH KITCHEN</span></div>
+ <p>Your favourite food, delivered fast.</p>
+ </div>
+ <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="menu.html">Menu</a></li></ul></div>
+ <div class="footer-col"><h4>Support</h4><ul><li><a href="#">Help Centre</a></li><li><a href="#">Track Order</a></li></ul></div>
+ <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li></ul></div>
+ </div>
+ <div class="footer-bottom"><span>© 2025 UTKARSH KITCHEN. All rights reserved.</span></div>
+ </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+ /* ── Order data ── */
+ const fmt = n => '₹' + n.toLocaleString('en-IN');
+ try {
+ const order = JSON.parse(sessionStorage.getItem('UTKARSH KITCHEN_last_order')) || {};
+ if (order.id) document.getElementById('orderIdDisplay').textContent = 'Order #' + order.id;
+ if (order.total) document.getElementById('totalPaid').textContent = fmt(order.total);
+ const methodMap = {
+ upi: '📱 UPI Payment', card: '💳 Card Payment',
+ netbanking: '🏦 Net Banking', cod: '💵 Cash on Delivery', applepay: ' Apple Pay'
+ };
+ document.getElementById('paymentMethod').textContent = methodMap[order.method] || order.method || '—';
+ } catch {}
+
+ // Time
+ document.getElementById('timeConfirmed').textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+ /* ── Confetti ── */
+ const wrap = document.getElementById('confettiWrap');
+ const colors = ['#E63946','#FF6B35','#FFA500','#4CAF50','#2196F3','#9C27B0','#FFD700'];
+ for (let i = 0; i < 80; i++) {
+ const el = document.createElement('div');
+ el.className = 'confetti-piece';
+ el.style.cssText = `
+ left:${Math.random()*100}%;
+ background:${colors[Math.floor(Math.random()*colors.length)]};
+ animation-duration:${2 + Math.random()*3}s;
+ animation-delay:${Math.random()*2}s;
+ width:${6+Math.random()*8}px;
+ height:${6+Math.random()*8}px;
+ border-radius:${Math.random()>.5?'50%':'2px'};
+ `;
+ wrap.appendChild(el);
+ }
+
+ // Remove confetti after 5 seconds
+ setTimeout(() => { wrap.style.display = 'none'; }, 5000);
+
+ /* ── Simulate live tracking progress ── */
+ setTimeout(() => {
+ // Move to "Out for Delivery"
+ const steps = document.querySelectorAll('.track-step');
+ if (steps[2]) {
+ steps[2].classList.remove('pending'); steps[2].classList.add('active');
+ steps[2].querySelector('.track-icon').className = 'track-icon active';
+ steps[2].querySelector('.track-icon').innerHTML = '<i class="fas fa-motorcycle"></i>';
+ steps[1].classList.remove('active'); steps[1].classList.add('done');
+ steps[1].querySelector('.track-icon').className = 'track-icon done';
+ steps[1].querySelector('.track-icon').innerHTML = '<i class="fas fa-check"></i>';
+ }
+ }, 12000);
+});
+</script>
+</body>
+</html>

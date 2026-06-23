@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Restaurants — UTKARSH KITCHEN</title>
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <style>
+ /* ── Restaurant detail view ── */
+ .rest-detail { display: none; }
+ .rest-detail.visible { display: block; }
+ .rest-list-view { display: block; }
+ .rest-list-view.hidden { display: none; }
+
+ .rest-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+ .info-card { background: var(--surface); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--border); }
+ .info-card h4 { font-size: .82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 14px; }
+ .info-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: .88rem; }
+ .info-row i { color: var(--primary); width: 16px; flex-shrink: 0; margin-top: 2px; }
+ .info-row:last-child { margin-bottom: 0; }
+
+ /* Menu category nav */
+ .menu-cat-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+ .menu-cat-btn { padding: 8px 18px; border-radius: var(--radius-full); border: 1.5px solid var(--border); font-size: .85rem; font-weight: 600; color: var(--text-sub); cursor: pointer; transition: var(--transition); background: var(--surface); }
+ .menu-cat-btn:hover { border-color: var(--primary); color: var(--primary); }
+ .menu-cat-btn.active { background: var(--gradient); border-color: transparent; color: white; box-shadow: 0 3px 10px rgba(230,57,70,.3); }
+
+ .menu-section-title { font-size: 1.1rem; font-weight: 800; margin: 28px 0 18px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+ .rest-detail-inner { max-width: 1000px; margin: 0 auto; padding: 0 0 80px; }
+ </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+ <div class="container">
+ <div class="nav-inner">
+ <a href="index.html" class="nav-logo"><div class="logo-icon">🍴</div><span>UTKARSH KITCHEN</span></a>
+ <div class="nav-search">
+ <i class="fas fa-search"></i>
+ <input type="text" placeholder="Search restaurants…" aria-label="Search">
+ </div>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="menu.html">Menu</a></li>
+ <li><a href="restaurant.html" class="active">Restaurants</a></li>
+ <li><a href="menu.html?cat=offers">Offers</a></li>
+ </ul>
+ <div class="nav-actions">
+ <button class="btn-theme" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+ <a href="cart.html" class="cart-btn" aria-label="Cart">
+ <i class="fas fa-shopping-bag"></i>
+ <span class="cart-count" style="display:none">0</span>
+ </a>
+ <a href="#" class="btn-login" data-signin>Sign In</a>
+ <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+ </div>
+ </div>
+ </div>
+</nav>
+<div class="mobile-nav">
+ <div class="mobile-nav-search"><i class="fas fa-search"></i><input type="text" placeholder="Search…"></div>
+ <a href="index.html">🏠 Home</a><a href="menu.html">🍽️ Menu</a>
+ <a href="restaurant.html">🏪 Restaurants</a><a href="cart.html">🛒 Cart</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+ RESTAURANT LIST VIEW
+══════════════════════════════════════════════════════ -->
+<div class="rest-list-view" id="restListView">
+ <div class="page-header">
+ <div class="container">
+ <div class="breadcrumb"><a href="index.html">Home</a><i class="fas fa-chevron-right"></i><span>Restaurants</span></div>
+ <h1>All Restaurants</h1>
+ <p>Discover amazing food from our partner restaurants.</p>
+ </div>
+ </div>
+
+ <div class="container" style="padding-top:32px;padding-bottom:80px;">
+ <!-- Filters -->
+ <div class="search-filter-bar" style="margin-bottom:32px;">
+ <div class="search-row">
+ <div class="search-input-wrap" style="flex:1">
+ <i class="fas fa-search"></i>
+ <input type="text" id="restSearch" placeholder="Search restaurants or cuisine…" aria-label="Search restaurants">
+ </div>
+ </div>
+ <div class="filter-row">
+ <button class="filter-chip active" data-cuisine="all">All</button>
+ <button class="filter-chip" data-cuisine="Italian">🍕 Italian</button>
+ <button class="filter-chip" data-cuisine="American">🍔 American</button>
+ <button class="filter-chip" data-cuisine="Indian">🍛 Indian</button>
+ <button class="filter-chip" data-cuisine="Chinese">🍜 Chinese</button>
+ <button class="filter-chip" data-cuisine="Desserts">🍰 Desserts</button>
+ </div>
+ </div>
+
+ <div class="results-meta">
+ <div class="count"><span id="restCount">0</span> restaurants found</div>
+ </div>
+
+ <div class="restaurant-grid" id="allRestGrid"></div>
+ </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+ RESTAURANT DETAIL VIEW
+══════════════════════════════════════════════════════ -->
+<div class="rest-detail" id="restDetailView">
+ <!-- Cover -->
+ <div class="rest-cover" id="detailCover">
+ <img id="detailCoverImg" src="" alt="">
+ </div>
+
+ <div class="container">
+ <!-- Profile card -->
+ <div class="rest-profile" id="restProfile">
+ <div class="rest-profile-top">
+ <div class="rest-profile-logo">
+ <img id="detailLogo" src="" alt="">
+ </div>
+ <div class="rest-profile-info">
+ <h1 id="detailName"></h1>
+ <div class="rest-profile-stats" id="detailStats"></div>
+ <div class="rest-tags" id="detailTags"></div>
+ </div>
+ <div style="margin-left:auto;display:flex;gap:10px;align-items:flex-start;flex-shrink:0;">
+ <button class="btn btn-outline btn-sm" id="backToList">
+ <i class="fas fa-arrow-left"></i> All Restaurants
+ </button>
+ </div>
+ </div>
+ <!-- Tabs -->
+ <div class="rest-tabs">
+ <div class="rest-tab active" data-tab="menu">Menu</div>
+ <div class="rest-tab" data-tab="info">Info</div>
+ <div class="rest-tab" data-tab="reviews">Reviews</div>
+ </div>
+ </div>
+
+<!-- Tab content -->
+ <div class="rest-detail-inner">
+
+ <!-- MENU TAB -->
+ <div id="tabMenu">
+ <div class="menu-cat-nav" id="menuCatNav"></div>
+ <div id="menuContent"></div>
+ </div>
+
+ <!-- INFO TAB -->
+ <div id="tabInfo" style="display:none">
+ <div class="rest-info-grid">
+ <div class="info-card">
+ <h4>Contact & Location</h4>
+ <div class="info-row"><i class="fas fa-map-marker-alt"></i><span id="detailAddress"></span></div>
+ <div class="info-row"><i class="fas fa-clock"></i><span id="detailHours"></span></div>
+ <div class="info-row"><i class="fas fa-phone"></i><span>+91 98765 43210</span></div>
+ <div class="info-row"><i class="fas fa-envelope"></i><span>hello@UTKARSH KITCHEN.in</span></div>
+ </div>
+ <div class="info-card">
+ <h4>Delivery Info</h4>
+ <div class="info-row"><i class="fas fa-motorcycle"></i><span id="detailDelivery"></span></div>
+ <div class="info-row"><i class="fas fa-receipt"></i><span id="detailMinOrder"></span></div>
+ <div class="info-row"><i class="fas fa-star"></i><span id="detailRating"></span></div>
+ <div class="info-row"><i class="fas fa-shield-alt"></i><span>FSSAI Licensed</span></div>
+ </div>
+ </div>
+ </div>
+
+ <!-- REVIEWS TAB -->
+ <div id="tabReviews" style="display:none">
+ <div class="testimonials-grid" id="restReviews"></div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer" style="margin-top:0">
+ <div class="container">
+ <div class="footer-grid">
+ <div class="footer-brand">
+ <div class="nav-logo"><div class="logo-icon">🍴</div><span style="color:white;-webkit-text-fill-color:white">UTKARSH KITCHEN</span></div>
+ <p>Your favourite food, delivered fast.</p>
+ <div class="footer-social">
+ <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+ <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+ <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+ </div>
+ </div>
+ <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="menu.html">Menu</a></li><li><a href="restaurant.html">Restaurants</a></li></ul></div>
+ <div class="footer-col"><h4>Support</h4><ul><li><a href="#">Help Centre</a></li><li><a href="#">Track Order</a></li><li><a href="#">Refunds</a></li></ul></div>
+ <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Partner</a></li></ul></div>
+ </div>
+ <div class="footer-bottom"><span>© 2025 UTKARSH KITCHEN. All rights reserved.</span></div>
+ </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+ const params = new URLSearchParams(location.search);
+ const restId = params.get('id');
+
+ /* ── LIST VIEW ── */
+ function renderList(items) {
+ const grid = document.getElementById('allRestGrid');
+ const count = document.getElementById('restCount');
+ grid.innerHTML = items.map(r => renderRestCard(r)).join('');
+ count.textContent = items.length;
+ }
+
+ renderList(AppData.restaurants);
+
+ // Search restaurants
+ let searchTimer;
+ document.getElementById('restSearch').addEventListener('input', function() {
+ clearTimeout(searchTimer);
+ searchTimer = setTimeout(() => {
+ const q = this.value.toLowerCase();
+ const filtered = AppData.restaurants.filter(r =>
+ r.name.toLowerCase().includes(q) ||
+ r.cuisine.some(c => c.toLowerCase().includes(q))
+ );
+ renderList(filtered);
+ }, 280);
+ });
+
+ // Cuisine filter chips
+ document.querySelectorAll('[data-cuisine]').forEach(btn => {
+ btn.addEventListener('click', () => {
+ document.querySelectorAll('[data-cuisine]').forEach(b => b.classList.remove('active'));
+ btn.classList.add('active');
+ const cuisine = btn.dataset.cuisine;
+ const filtered = cuisine === 'all'
+ ? AppData.restaurants
+ : AppData.restaurants.filter(r => r.cuisine.includes(cuisine));
+ renderList(filtered);
+ });
+ });
+
+ // Click restaurant card → show detail
+ document.getElementById('allRestGrid').addEventListener('click', e => {
+ const card = e.target.closest('.rest-card');
+ if (!card) return;
+ e.preventDefault();
+ const id = new URL(card.href, location.href).searchParams.get('id');
+ if (id) showDetail(id);
+ });
+
+ /* ── DETAIL VIEW ── */
+ function showDetail(id) {
+ const rest = AppData.getRestaurant(id);
+ if (!rest.id) return;
+
+ // Populate
+ document.getElementById('detailCoverImg').src = rest.cover;
+ document.getElementById('detailCoverImg').alt = rest.name;
+ document.getElementById('detailLogo').src = rest.logo;
+ document.getElementById('detailLogo').alt = rest.name;
+ document.getElementById('detailName').textContent = rest.name;
+ document.getElementById('detailAddress').textContent = rest.address;
+ document.getElementById('detailHours').textContent = rest.openHours;
+ document.getElementById('detailDelivery').textContent = `${rest.deliveryTime} | Fee: ${rest.deliveryFee === 0 ? 'Free' : '₹' + rest.deliveryFee}`;
+ document.getElementById('detailMinOrder').textContent = 'Min. order: ₹' + rest.minOrder;
+ document.getElementById('detailRating').textContent = `${rest.rating} ⭐ (${rest.reviews.toLocaleString()} reviews)`;
+
+document.getElementById('detailStats').innerHTML = `
+ <span class="rating"><i class="fas fa-star"></i> ${rest.rating} (${rest.reviews.toLocaleString()})</span>
+ <span><i class="far fa-clock"></i> ${rest.deliveryTime}</span>
+ <span><i class="fas fa-map-marker-alt"></i> ${rest.address.split(',')[0]}</span>
+ <span style="color:${rest.isOpen?'#2e7d32':'#e63946'}">${rest.isOpen?'🟢 Open Now':'🔴 Closed'}</span>`;
+
+ document.getElementById('detailTags').innerHTML =
+ rest.cuisine.map(c => `<span class="tag">${c}</span>`).join('') +
+ rest.tags.map(t => `<span class="badge badge-offer" style="margin-left:4px">${t}</span>`).join('');
+
+ // Build menu by category
+ const items = AppData.getByRestaurant(id);
+ const cats = [...new Set(items.map(i => i.category))];
+
+ const catNav = document.getElementById('menuCatNav');
+ catNav.innerHTML = cats.map((c, idx) => {
+ const catObj = AppData.categories.find(x => x.id === c);
+ return `<button class="menu-cat-btn ${idx===0?'active':''}" data-mcat="${c}">${catObj?.emoji||''} ${catObj?.name||c}</button>`;
+ }).join('');
+
+ function renderMenuItems(catFilter) {
+ const filtered = catFilter === 'all' ? items : items.filter(i => i.category === catFilter);
+ const content = document.getElementById('menuContent');
+ if (catFilter === 'all') {
+ content.innerHTML = cats.map(c => {
+ const catItems = items.filter(i => i.category === c);
+ const catObj = AppData.categories.find(x => x.id === c);
+ return `<div class="menu-section-title">${catObj?.emoji||''} ${catObj?.name||c}</div>
+ <div class="food-grid">${catItems.map(f=>renderFoodCard(f)).join('')}</div>`;
+ }).join('');
+ } else {
+ const catObj = AppData.categories.find(x => x.id === catFilter);
+ content.innerHTML = `<div class="menu-section-title">${catObj?.emoji||''} ${catObj?.name||catFilter}</div>
+ <div class="food-grid">${filtered.map(f=>renderFoodCard(f)).join('')}</div>`;
+ }
+ bindFoodCardEvents(content);
+ }
+
+ renderMenuItems('all');
+
+ catNav.addEventListener('click', e => {
+ const btn = e.target.closest('.menu-cat-btn');
+ if (!btn) return;
+ catNav.querySelectorAll('.menu-cat-btn').forEach(b => b.classList.remove('active'));
+ btn.classList.add('active');
+ renderMenuItems(btn.dataset.mcat);
+ });
+
+ // Reviews tab
+ document.getElementById('restReviews').innerHTML = AppData.testimonials.slice(0, 4).map(t => `
+ <div class="testi-card">
+ <div class="testi-quote">"</div>
+ <p class="testi-text">${t.text}</p>
+ <div class="testi-author">
+ <img src="${t.avatar}" alt="${t.name}" loading="lazy">
+ <div><div class="name">${t.name}</div><div class="order">${t.order} • ${'⭐'.repeat(t.rating)}</div></div>
+ </div>
+ </div>`).join('');
+
+ // Show detail, hide list
+ document.getElementById('restListView').classList.add('hidden');
+ document.getElementById('restDetailView').classList.add('visible');
+ window.scrollTo({ top: 0, behavior: 'smooth' });
+ history.pushState(null, '', `?id=${id}`);
+
+ /* Tabs */
+ document.querySelectorAll('.rest-tab').forEach(tab => {
+ tab.addEventListener('click', () => {
+ document.querySelectorAll('.rest-tab').forEach(t => t.classList.remove('active'));
+ tab.classList.add('active');
+ document.getElementById('tabMenu').style.display = tab.dataset.tab==='menu'?'block':'none';
+ document.getElementById('tabInfo').style.display = tab.dataset.tab==='info'?'block':'none';
+ document.getElementById('tabReviews').style.display = tab.dataset.tab==='reviews'?'block':'none';
+ });
+ });
+ }
+
+ // Back button
+ document.getElementById('backToList').addEventListener('click', () => {
+ document.getElementById('restDetailView').classList.remove('visible');
+ document.getElementById('restListView').classList.remove('hidden');
+ history.pushState(null, '', 'restaurant.html');
+ window.scrollTo({ top: 0, behavior: 'smooth' });
+ });
+
+ // Auto-open if id in URL
+ if (restId) showDetail(restId);
+});
+</script>
+</body>
+</html>
