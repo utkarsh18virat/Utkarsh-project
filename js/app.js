@@ -213,7 +213,9 @@ window.renderRestCard = function(rest, opts = {}) {
  ============================================================ */
 window.bindFoodCardEvents = function(container) {
  if (!container) return;
-
+ if (container._foodCardBound) return;
+ container._foodCardBound = true;
+ 
  // Add to cart
  container.addEventListener('click', e => {
  const addBtn = e.target.closest('[data-add]');
